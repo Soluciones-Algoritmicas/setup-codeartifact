@@ -1,0 +1,19 @@
+name: Setup code artifact
+description: Sets up code artifact for PIP
+inputs:
+  domain:
+    description: 'CodeArtifact domain'
+  domain-owner:
+    description: 'CodeArtifact domain owner ID'
+  repository:
+    description: 'CodeArtifact repository'
+  region:
+    description: 'AWS default region'
+runs:
+  using: 'composite'
+  steps:
+    - shell: bash
+      run: |
+        CODEARTIFACT_AUTH_TOKEN="$(aws codeartifact get-authorization-token --domain ${{inputs.domain}} --domain-owner ${{inputs.domain-owner}} --query authorizationToken --output text)"
+        echo "PIP_INDEX_URL=https://aws:${CODEARTIFACT_AUTH_TOKEN}@${{inputs.domain}}-${{inputs.domain-owner}}.d.codeartifact.${{inputs.region}}.amazonaws.com/pypi/${{inputs.repository}}/simple/" >> $GITHUB_ENV
+        echo PIP_EXTRA_INDEX_URL=https://pypi.python.org/pypi >> $GITHUB_ENV
